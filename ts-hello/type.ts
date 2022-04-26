@@ -18,6 +18,6 @@ let message = "abc";
 let endWithC = message.endsWith("c");
 console.log(message.anchor);
 
-// type assertion used for type any
+// type assertion used for type any, for intellisense
 (<string>message).endsWith("c");
 (message as string).endsWith("c");
