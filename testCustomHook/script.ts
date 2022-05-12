@@ -1,4 +1,7 @@
-class UIValue {
+import { gbi } from "../utils/domUtils";
+import { event } from "../utils/utils";
+
+export class UIVariable {
   fnObservers: any[] = [];
   elObservers: any[] = [];
   value: any;
@@ -46,18 +49,45 @@ class UIValue {
   } //array of observer functions
 }
 
-class VarInjection {
-  pointsOfInjection: any[] = [];
-  variable: UIValue;
-  constructor(variable: UIValue, selector: any) {
-    this.variable = variable;
-    this.pointsOfInjection = Array.from(
+export class VarInjector {
+  inject(variable: UIVariable, selector: any) {
+    variable = variable;
+    let pointsOfInjection = Array.from(
       document.querySelectorAll(`[data-${selector}]`)
     );
-    if (this.pointsOfInjection.length > 0) {
-      this.pointsOfInjection.forEach((el) => {
+    if (pointsOfInjection.length > 0) {
+      pointsOfInjection.forEach((el) => {
         variable.subscribeEl(el);
+
+        variable.fire();
       });
     }
   }
+  bulkInject(data: any) {
+    loopKeyValueArray(data, this.inject);
+  }
 }
+
+const loopKeyValueArray = (array: any, fn: any) => {
+  array.forEach((childArray: any) => {
+    let key = childArray[0];
+    let val = childArray[1];
+    fn(key, val);
+  });
+};
+
+const test = () => {
+  let injector = new VarInjector();
+
+  let val = { count: new UIVariable(0), diffCount: new UIVariable(0) };
+
+  injector.bulkInject([
+    [val.count, "count"],
+    [val.diffCount, "diffCount"],
+  ]);
+
+  event(gbi("test-btn"), "click", () => {
+    val.count.Value++;
+    val.diffCount.Value += 2;
+  });
+};
